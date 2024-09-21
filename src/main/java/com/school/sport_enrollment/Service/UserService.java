@@ -18,6 +18,7 @@ import com.school.sport_enrollment.Dto.SportDto;
 import com.school.sport_enrollment.Dto.UserDto;
 import com.school.sport_enrollment.Model.Sport;
 import com.school.sport_enrollment.Model.User;
+import com.school.sport_enrollment.Repository.SportRepository;
 import com.school.sport_enrollment.Repository.UserRepository;
 import com.school.sport_enrollment.Response.BaseResponse;
 import com.school.sport_enrollment.Response.SportResponse;
@@ -29,11 +30,11 @@ import com.school.sport_enrollment.Utils.Helpers;
 public class UserService {
 
     private UserRepository userRepository;
+    private SportRepository sportRepository;
 
-    @Autowired
-
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, SportRepository sportRepository) {
         this.userRepository = userRepository;
+        this.sportRepository = sportRepository;
     }
 
     public PasswordEncoder passwordEncoder() {
@@ -254,4 +255,73 @@ public class UserService {
             return userResponse;
         }
     }
+
+    public UserResponse updateUserWithSport(Long userId, Long sportId) {
+
+        try {
+
+            Optional<User> user = userRepository.findById(userId);
+
+            if (!user.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+            }
+            Optional<Sport> sport = sportRepository.findById(sportId);
+
+            if (!sport.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport does not exist");
+            }
+            List<Sport> userExistingSport = user.get().getSport();
+
+            if (userExistingSport.size() > 0) {
+
+                for (Sport sportInstance : userExistingSport) {
+                    if (sportInstance.getSportType().equals(SportType.TEAM)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You've exceeded your sport limit");
+                    }
+
+                    // List<Sport> roles = user.getRoles();
+                    // roles.add(use.get());
+                    // user.setRoles(roles);
+                    // users.add(user);
+                }
+                if (sport.get().getSportType().equals(SportType.TEAM)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You've exceeded your sport limit");
+                }
+                userExistingSport.add(sport.get());
+
+                user.get().setSport(userExistingSport);
+                userRepository.save(user.get());
+                UserResponse userResponse = new UserResponse(user.get(), HttpStatus.OK,
+                        "Sport successfully added to User");
+                return userResponse;
+
+            } else {
+
+                userExistingSport.add(sport.get());
+
+                user.get().setSport(userExistingSport);
+                userRepository.save(user.get());
+                UserResponse userResponse = new UserResponse(user.get(), HttpStatus.OK,
+                        "Sport successfully added to User");
+                return userResponse;
+
+            }
+
+        } catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            UserResponse userResponse = new UserResponse(null, status, message);
+            return userResponse;
+
+        } catch (Exception e) {
+            UserResponse userResponse = new UserResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            System.out.println(e);
+            return userResponse;
+
+        }
+
+    }
+
 }

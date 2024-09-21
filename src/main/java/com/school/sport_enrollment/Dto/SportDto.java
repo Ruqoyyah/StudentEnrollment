@@ -1,6 +1,11 @@
 package com.school.sport_enrollment.Dto;
 
+import org.hibernate.mapping.List;
+
 import com.school.sport_enrollment.Enums.SportType;
+
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToMany;
 
 public class SportDto {
     private String sportName;

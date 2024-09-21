@@ -11,9 +11,11 @@ import org.springframework.web.server.ResponseStatusException;
 import com.school.sport_enrollment.Dto.SportDto;
 import com.school.sport_enrollment.Enums.SportType;
 import com.school.sport_enrollment.Model.Sport;
+import com.school.sport_enrollment.Model.User;
 import com.school.sport_enrollment.Repository.SportRepository;
 import com.school.sport_enrollment.Response.BaseResponse;
 import com.school.sport_enrollment.Response.SportResponse;
+import com.school.sport_enrollment.Response.UserResponse;
 import com.school.sport_enrollment.Utils.Helpers;
 
 @Service

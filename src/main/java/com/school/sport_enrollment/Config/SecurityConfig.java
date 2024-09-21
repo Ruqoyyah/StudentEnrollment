@@ -43,7 +43,9 @@ public class SecurityConfig {
                                 "/api/user/update_user/{id}",
                                 "/api/user/get_user_by_id/{id}",
                                 "/api/user/signin",
-                                "/api/enrollments/student/{studentId}/sport/{sportId}")
+                                "/api/enrollments/student/{studentId}/sport/{sportId}",
+                                "/api/user/update_user_with_sport/{userId}/{sportId}")
+
                         .permitAll() // Exclude
                         // the
                         // "create

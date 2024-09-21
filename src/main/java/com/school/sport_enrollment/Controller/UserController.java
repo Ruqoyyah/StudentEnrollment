@@ -141,6 +141,13 @@ public class UserController {
 
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong", e);
         }
+    }
+
+    @PutMapping("/update_user_with_sport/{userId}/{sportId}")
+
+    public ResponseEntity<UserResponse> updateUserWithSport(@PathVariable Long userId, @PathVariable Long sportId) {
+        UserResponse updateUserWithSport = userService.updateUserWithSport(userId, sportId);
+        return new ResponseEntity<>(updateUserWithSport, updateUserWithSport.getStatusCode());
 
     }
 }

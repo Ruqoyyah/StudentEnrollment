@@ -3,14 +3,19 @@ package com.school.sport_enrollment.Model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.school.sport_enrollment.Enums.SportType;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -53,6 +58,18 @@ public class Sport {
 
     public void setSportType(SportType sportType) {
         this.sportType = sportType;
+    }
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "sport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<User> users;
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
 }

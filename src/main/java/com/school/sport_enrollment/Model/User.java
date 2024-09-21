@@ -1,18 +1,12 @@
 package com.school.sport_enrollment.Model;
 
 import org.hibernate.annotations.CreationTimestamp;
-
+import java.util.List;
 import com.school.sport_enrollment.Enums.UserType;
 
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 
 @Entity
@@ -109,6 +103,18 @@ public class User {
 
     public void setUserType(UserType userType) {
         this.userType = userType;
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_sport_assignments", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "sportId"))
+    private List<Sport> sport;
+
+    public List<Sport> getSport() {
+        return sport;
+    }
+
+    public void setSport(List<Sport> sport) {
+        this.sport = sport;
     }
 
 }
