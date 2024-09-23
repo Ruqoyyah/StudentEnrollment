@@ -150,4 +150,28 @@ public class UserController {
         return new ResponseEntity<>(updateUserWithSport, updateUserWithSport.getStatusCode());
 
     }
+
+    @GetMapping("/get_user_by_sportid/{sportid}")
+
+    public ResponseEntity<BaseResponse> getUserBySportId(@PathVariable Long sportid) {
+
+        BaseResponse user = userService.getUserBySportId(sportid);
+        return new ResponseEntity<>(user, user.getStatusCode());
+    }
+
+    @PutMapping("/update_user/{userid}/{sportid}")
+
+    public ResponseEntity<UserResponse> updateUsersBySportId(@PathVariable Long userid, @PathVariable Long sportid) {
+        UserResponse updateUser = userService.updateUserBySportId(userid, sportid);
+        return new ResponseEntity<>(updateUser, updateUser.getStatusCode());
+
+        // @PutMapping("/update_user_with_sportid/{userId}/{sportId}")
+
+        // public ResponseEntity<UserResponse> updateUserWithSportId(@PathVariable Long
+        // userId, @PathVariable Long sportId) {
+        // UserResponse updateUserWithSportid = userService.updateUserWithSport(userId,
+        // sportId);
+        // return new ResponseEntity<>(updateUserWithSportid,
+        // updateUserWithSportid.getStatusCode());
+    }
 }

@@ -324,4 +324,79 @@ public class UserService {
 
     }
 
+    public BaseResponse getUserBySportId(Long sportid) {
+
+        try {
+            Optional<Sport> sport = sportRepository.findById(sportid);
+
+            List<User> user = userRepository.findBySport(sport.get());
+
+            if (user.isEmpty()) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+
+            }
+            BaseResponse baseResponse = new BaseResponse(user, HttpStatus.OK, "Users successfully fetched");
+            return baseResponse;
+
+        } catch (Exception e) {
+            BaseResponse baseResponse = new BaseResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            System.out.println(e);
+            return baseResponse;
+        }
+
+    }
+
+    public UserResponse updateUserBySportId(Long userId, Long sportId) {
+
+        try {
+
+            Optional<User> user = userRepository.findById(userId);
+
+            if (!user.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+            }
+            Optional<Sport> sport = sportRepository.findById(sportId);
+
+            if (!sport.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport does not exist");
+            }
+            List<Sport> userExistingSport = user.get().getSport();
+
+            if (userExistingSport.size() > 1) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot update more than one sport");
+            }
+
+            // List<Sport> roles = user.getRoles();
+            // roles.add(use.get());
+            // user.setRoles(roles);
+            // users.add(user);
+
+            else {
+
+                userExistingSport.clear(); // Remove the current sport
+                userExistingSport.add(sport.get()); // Add the new sport
+                user.get().setSport(userExistingSport);
+                userRepository.save(user.get());
+                UserResponse userResponse = new UserResponse(user.get(), HttpStatus.OK,
+                        "Sport successfully updated ");
+                return userResponse;
+
+            }
+
+        } catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            UserResponse userResponse = new UserResponse(null, status, message);
+            return userResponse;
+
+        } catch (Exception e) {
+            UserResponse userResponse = new UserResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            System.out.println(e);
+            return userResponse;
+        }
+    }
 }
