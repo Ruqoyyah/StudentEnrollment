@@ -8,14 +8,19 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.school.sport_enrollment.Utils.CustomUserDetailService;
+import com.school.sport_enrollment.Utils.JwtRequestFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -24,38 +29,54 @@ public class SecurityConfig {
     @Autowired
     CustomUserDetailService customUserDetailService;
 
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
+@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        //http = http.cors().and().csrf().disable();
+         http = http
+            .exceptionHandling()
+            .authenticationEntryPoint(
+                (request, response, ex) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + ex.getMessage() + "\"}");
+                }
+            )
+            .and();
         http
-                .csrf().disable() // Disable CSRF for REST APIs
-                .cors().and().authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/api/sport/create_sport",
+                .csrf().disable()  // Disable CSRF for REST APIs
+                .cors().and()
+                .authorizeHttpRequests((authz) -> authz
+                        .requestMatchers(
+                                "/api/sport/create_sport",
                                 "/api/user/create_super_admin",
+                                "/v3/api-docs/**",
                                 "/api/user/create_student",
                                 "/api/user/get_all_user",
+                                "/swagger-ui/**", 
+                                "/swagger-ui.html",
                                 "/api/user/get_all_User_by_type/{userType}",
                                 "/api/user/delete_user/{id}",
                                 "/api/user/update_user/{id}",
                                 "/api/user/get_user_by_id/{id}",
-                                "/api/user/signin",
+                                "/api/user/signin",  // Public endpoints
                                 "/api/user/update_user_with_sport/{userId}/{sportId}",
                                 "/api/user/get_user_by_sportid/{sportid}",
-                                "api/user/update_user/{userid}/{sportid}")
+                                "api/user/update_user/{userid}/{sportid}"
+                        ).permitAll()  // Allow listed endpoints without authentication
+                        .anyRequest().authenticated()  // All other endpoints require authentication
+                )
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // Make the app stateless
 
-                        .permitAll() // Exclude
-                        // the
-                        // "create
-                        // user"
-                        // endpoint
-                        // from
-                        // authentication
-                        .anyRequest().authenticated() // All other endpoints require authentication
-                );
+        // Add JwtRequestFilter before UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

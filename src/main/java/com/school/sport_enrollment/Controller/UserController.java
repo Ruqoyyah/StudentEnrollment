@@ -113,12 +113,16 @@ public class UserController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             CustomUserDetailImpl userDetails = (CustomUserDetailImpl) authentication.getPrincipal();
-
+            
             String jwt = jwtUtil.generateTokenFromEmail(userDetails.getEmail());
             UserInforResponse userInforResponse = new UserInforResponse();
 
             userInforResponse.setJwt(jwt);
             userInforResponse.setEmail(userDetails.getEmail());
+            userInforResponse.setUserType(userService.getUser(userDetails.getEmail()).getUserType());
+            userInforResponse.setFirstName(userService.getUser(userDetails.getEmail()).getFirstname());
+            userInforResponse.setLastName(userService.getUser(userDetails.getEmail()).getLastname());
+            userInforResponse.setId(userService.getUser(userDetails.getEmail()).getId());
 
             BaseResponse baseResponse = new BaseResponse(userInforResponse, HttpStatus.OK,
                     "User successfully logged in");

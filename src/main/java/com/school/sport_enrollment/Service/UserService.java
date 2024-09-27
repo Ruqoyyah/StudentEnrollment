@@ -45,6 +45,11 @@ public class UserService {
     // this.passwordEncoder = passwordEncoder;
     // }
 
+    public User getUser(String email){
+        Optional<User> User = userRepository.findByEmail(email);
+        return User.get();
+    }
+
     public BaseResponse getAllUsers() {
 
         try {
