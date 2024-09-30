@@ -45,7 +45,7 @@ public class UserService {
     // this.passwordEncoder = passwordEncoder;
     // }
 
-    public User getUser(String email){
+    public User getUser(String email) {
         Optional<User> User = userRepository.findByEmail(email);
         return User.get();
     }
@@ -404,4 +404,40 @@ public class UserService {
             return userResponse;
         }
     }
+
+    public UserResponse deleteSportByUserId(Long userid, Long sportid) {
+
+        try {
+
+            Optional<User> user = userRepository.findById(userid);
+
+            if (!user.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+            }
+            Optional<Sport> sport = sportRepository.findById(sportid);
+
+            if (!sport.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport does not exist");
+            }
+            user.get().removeSport(sport.get());
+            userRepository.save(user.get());
+
+            UserResponse userResponse = new UserResponse(null, HttpStatus.OK, "Sport successfully deleted");
+            return userResponse;
+
+        } catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            UserResponse userResponse = new UserResponse(null, status, message);
+            return userResponse;
+
+        } catch (Exception e) {
+            UserResponse userResponse = new UserResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            System.out.println(e);
+            return userResponse;
+        }
+    }
+
 }

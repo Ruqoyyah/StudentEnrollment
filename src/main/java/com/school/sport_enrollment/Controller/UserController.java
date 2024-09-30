@@ -113,7 +113,7 @@ public class UserController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             CustomUserDetailImpl userDetails = (CustomUserDetailImpl) authentication.getPrincipal();
-            
+
             String jwt = jwtUtil.generateTokenFromEmail(userDetails.getEmail());
             UserInforResponse userInforResponse = new UserInforResponse();
 
@@ -177,5 +177,12 @@ public class UserController {
         // sportId);
         // return new ResponseEntity<>(updateUserWithSportid,
         // updateUserWithSportid.getStatusCode());
+    }
+
+    @DeleteMapping("/delete_sportByUser/{userid}/{sportid}")
+
+    public ResponseEntity<UserResponse> deleteSportByUserId(@PathVariable Long userid, @PathVariable Long sportid) {
+        UserResponse deleteSport = userService.deleteSportByUserId(userid, sportid);
+        return new ResponseEntity<>(deleteSport, deleteSport.getStatusCode());
     }
 }

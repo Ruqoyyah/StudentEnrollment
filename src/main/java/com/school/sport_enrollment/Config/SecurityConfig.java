@@ -36,44 +36,39 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-@Bean
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        //http = http.cors().and().csrf().disable();
-         http = http
-            .exceptionHandling()
-            .authenticationEntryPoint(
-                (request, response, ex) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + ex.getMessage() + "\"}");
-                }
-            )
-            .and();
+        // http = http.cors().and().csrf().disable();
+        http = http
+                .exceptionHandling()
+                .authenticationEntryPoint(
+                        (request, response, ex) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter()
+                                    .write("{\"error\": \"Unauthorized\", \"message\": \"" + ex.getMessage() + "\"}");
+                        })
+                .and();
         http
-                .csrf().disable()  // Disable CSRF for REST APIs
+                .csrf().disable() // Disable CSRF for REST APIs
                 .cors().and()
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers(
-                                "/api/sport/create_sport",
+
                                 "/api/user/create_super_admin",
                                 "/v3/api-docs/**",
-                                "/api/user/create_student",
-                                "/api/user/get_all_user",
-                                "/swagger-ui/**", 
+
+                                "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api/user/get_all_User_by_type/{userType}",
-                                "/api/user/delete_user/{id}",
-                                "/api/user/update_user/{id}",
-                                "/api/user/get_user_by_id/{id}",
-                                "/api/user/signin",  // Public endpoints
-                                "/api/user/update_user_with_sport/{userId}/{sportId}",
-                                "/api/user/get_user_by_sportid/{sportid}",
-                                "api/user/update_user/{userid}/{sportid}"
-                        ).permitAll()  // Allow listed endpoints without authentication
-                        .anyRequest().authenticated()  // All other endpoints require authentication
+
+                                "/api/user/signin" // Public endpoints
+
+                        ).permitAll() // Allow listed endpoints without authentication
+                        .anyRequest().authenticated() // All other endpoints require authentication
                 )
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // Make the app stateless
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // Make the app stateless
 
         // Add JwtRequestFilter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

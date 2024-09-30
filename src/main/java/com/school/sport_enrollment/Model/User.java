@@ -117,4 +117,9 @@ public class User {
         this.sport = sport;
     }
 
+    public void removeSport(Sport sport) {
+        this.sport.remove(sport);
+        sport.getUsers().remove(this);
+    }
+
 }
