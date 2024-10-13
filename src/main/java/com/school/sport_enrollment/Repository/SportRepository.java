@@ -14,4 +14,6 @@ public interface SportRepository extends JpaRepository<Sport, Long> {
 
     List<Sport> findBySportType(SportType sportType);
 
+    Optional<Sport> findBySportNameAndYear(String sportName, Long year);
+
 }

@@ -17,12 +17,14 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @SpringBootApplication
-//@OpenAPIDefinition(info = @Info(title = "RBACK API", version = "1.0", description = "Documentation RBAC API v1.0"))
+// @OpenAPIDefinition(info = @Info(title = "RBACK API", version = "1.0",
+// description = "Documentation RBAC API v1.0"))
 public class SportEnrollmentApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SportEnrollmentApplication.class, args);
 	}
+
 	@Bean
 	public OpenAPI myAPI() {
 
@@ -38,9 +40,8 @@ public class SportEnrollmentApplication {
 								.addList("bearer-jwt", Arrays.asList("read", "write"))
 								.addList("bearer-key", Collections.emptyList()))
 				.servers(Arrays.asList(
-						
-						new ServerProp().url("http://localhost:8081").description("Local host URL")
-						));
+
+						new ServerProp().url("http://localhost:8081").description("Local host URL")));
 
 	}
 }

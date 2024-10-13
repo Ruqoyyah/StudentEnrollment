@@ -50,15 +50,18 @@ public class SportService {
             if (Helpers.isStringEmptyOrBlank(sportDto.getSportName())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport Name cannot be blank");
             }
-            Optional<Sport> sport = sportRepository.findBySportName(sportDto.getSportName());
+            Optional<Sport> sport = sportRepository.findBySportNameAndYear(sportDto.getSportName(), sportDto.getYear());
 
             if (sport.isPresent()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport Name already exist");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport already exist");
             }
 
             Sport Newsport = new Sport();
             Newsport.setSportName(sportDto.getSportName());
             Newsport.setSportType(sportDto.getSportType());
+            Newsport.setEnrollmentDeadline(sportDto.getEnrollmentDeadline());
+            Newsport.setYear(sportDto.getYear());
+            Newsport.setSeason(sportDto.getSeason());
             Sport createdSport = sportRepository.save(Newsport);
             SportResponse sportResponse = new SportResponse(createdSport, HttpStatus.OK, "Sport successfully created");
             return sportResponse;
@@ -140,6 +143,11 @@ public class SportService {
             if (!sport.isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport ID does not exist");
             }
+            List<User> enrolledUsers = sport.get().getUsers();
+            if (enrolledUsers.size() > 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Sport cannot be deleted,uneroll users registered for the sport to delete");
+            }
             sportRepository.deleteById(id);
             BaseResponse baseResponse = new BaseResponse(null, HttpStatus.OK, "Sport successfully deleted");
             return baseResponse;
@@ -158,6 +166,15 @@ public class SportService {
             BaseResponse baseResponse = new BaseResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
             return baseResponse;
         }
+    }
+
+    public Sport getSportById(Long id) {
+
+        Optional<Sport> sport = sportRepository.findById(id);
+        if (!sport.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport ID does not exist");
+        }
+        return sport.get();
     }
 
 }

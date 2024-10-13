@@ -3,6 +3,8 @@ package com.school.sport_enrollment.Model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.grammars.hql.HqlParser.LocalDateTimeContext;
+
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,6 +38,39 @@ public class Sport {
 
     @Column(name = "SportType")
     private SportType sportType;
+
+    @Column(name = "EnrollmentDeadline")
+    private LocalDateTime enrollmentDeadline;
+
+    @Column(name = "Year")
+    private Long year;
+
+    @Column(name = "Season")
+    private String season;
+
+    public Long getYear() {
+        return year;
+    }
+
+    public void setYear(Long year) {
+        this.year = year;
+    }
+
+    public String getSeason() {
+        return season;
+    }
+
+    public void setSeason(String season) {
+        this.season = season;
+    }
+
+    public LocalDateTime getEnrollmentDeadline() {
+        return enrollmentDeadline;
+    }
+
+    public void setEnrollmentDeadline(LocalDateTime enrollmentDeadline) {
+        this.enrollmentDeadline = enrollmentDeadline;
+    }
 
     public Long getId() {
         return id;
@@ -71,5 +107,8 @@ public class Sport {
     public void setUsers(List<User> users) {
         this.users = users;
     }
+
+    @OneToMany(mappedBy = "sport", cascade = CascadeType.ALL)
+    private List<SportEvent> events;
 
 }

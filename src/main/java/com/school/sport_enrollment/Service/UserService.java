@@ -2,12 +2,16 @@ package com.school.sport_enrollment.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 import com.school.sport_enrollment.Enums.SportType;
 // import org.hibernate.usertype.UserType;
 import com.school.sport_enrollment.Enums.UserType;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -202,6 +206,11 @@ public class UserService {
             if (!user.isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
             }
+            List<Sport> enrolledSport = user.get().getSport();
+            if (enrolledSport.size() > 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "User cannot be deleted because user has an existing Sport");
+            }
             userRepository.deleteById(id);
             UserResponse userResponse = new UserResponse(null, HttpStatus.OK, "User successfully deleted");
             return userResponse;
@@ -275,6 +284,12 @@ public class UserService {
             if (!sport.isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport does not exist");
             }
+            LocalDateTime enrollmentDeadline = sport.get().getEnrollmentDeadline();
+            if (enrollmentDeadline.isBefore(LocalDateTime.now())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Enrollment deadline has passed for this Sport");
+
+            }
             List<Sport> userExistingSport = user.get().getSport();
 
             if (userExistingSport.size() > 0) {
@@ -292,6 +307,7 @@ public class UserService {
                 if (sport.get().getSportType().equals(SportType.TEAM)) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You've exceeded your sport limit");
                 }
+
                 userExistingSport.add(sport.get());
 
                 user.get().setSport(userExistingSport);
