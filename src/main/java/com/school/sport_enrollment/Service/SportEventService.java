@@ -1,6 +1,7 @@
 package com.school.sport_enrollment.Service;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,13 @@ public class SportEventService {
 
     private final SportService sportService;
 
-    public SportEventService(SportEventRepository sportEventRepository, SportService sportService) {
+    private final UserService userService;
+
+    public SportEventService(SportEventRepository sportEventRepository, SportService sportService,
+            UserService userService) {
         this.sportEventRepository = sportEventRepository;
         this.sportService = sportService;
+        this.userService = userService;
 
     }
 
@@ -345,4 +350,39 @@ public class SportEventService {
         }
     }
 
+    public BaseResponse getEventsForStudent(Long userid) {
+
+        try {
+
+            User user = userService.getUsersById(userid);
+
+            if (user == null) {
+
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+            }
+
+            List<Long> sportid = user.getSport().stream().map(Sport::getId).collect(Collectors.toList());
+
+            List<SportEvent> studentEvents = sportEventRepository.findEventBySportId(sportid);
+
+            BaseResponse baseResponse = new BaseResponse(studentEvents, HttpStatus.OK, "Events fetched successfully");
+            return baseResponse;
+
+        }
+
+        catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            BaseResponse baseResponse = new BaseResponse(null, status, message);
+            return baseResponse;
+
+        } catch (Exception e) {
+            BaseResponse baseResponse = new BaseResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            return baseResponse;
+
+        }
+    }
 }

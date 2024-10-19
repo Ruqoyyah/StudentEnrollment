@@ -456,4 +456,13 @@ public class UserService {
         }
     }
 
+    public User getUsersById(Long id) {
+
+        Optional<User> user = userRepository.findById(id);
+        if (!user.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport ID does not exist");
+        }
+        return user.get();
+
+    }
 }

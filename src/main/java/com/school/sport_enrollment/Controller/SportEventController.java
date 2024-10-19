@@ -108,4 +108,12 @@ public class SportEventController {
         BaseResponse sportEvent = sportEventService.getPastEventsBySport(sportid);
         return new ResponseEntity<>(sportEvent, sportEvent.getStatusCode());
     }
+
+    @GetMapping("/get_event_byuserid/{userid}")
+
+    public ResponseEntity<BaseResponse> getEventsForStudent(@PathVariable Long userid) {
+        BaseResponse sportEvent = sportEventService.getEventsForStudent(userid);
+
+        return new ResponseEntity<>(sportEvent, sportEvent.getStatusCode());
+    }
 }
