@@ -385,4 +385,81 @@ public class SportEventService {
 
         }
     }
+
+    public BaseResponse getPastEventsForStudent(Long userid) {
+        try {
+
+            User user = userService.getUsersById(userid);
+            LocalDateTime currentTime = LocalDateTime.now();
+
+            if (user == null) {
+
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+            }
+
+            List<Long> sportid = user.getSport().stream().map(Sport::getId).collect(Collectors.toList());
+
+            List<SportEvent> studentEvents = sportEventRepository.findPastEventsByStudent(sportid, currentTime);
+
+            BaseResponse baseResponse = new BaseResponse(studentEvents, HttpStatus.OK,
+                    "Past Events successfully fetched");
+
+            return baseResponse;
+
+        }
+
+        catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            BaseResponse baseResponse = new BaseResponse(null, status, message);
+            return baseResponse;
+
+        } catch (Exception e) {
+            BaseResponse baseResponse = new BaseResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            return baseResponse;
+
+        }
+    }
+
+    public BaseResponse getUpcomingEventsForStudent(Long userid) {
+        try {
+
+            User user = userService.getUsersById(userid);
+
+            if (user == null) {
+
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+            }
+
+            LocalDateTime currentTime = LocalDateTime.now();
+            List<Long> sportid = user.getSport().stream().map(Sport::getId).collect(Collectors.toList());
+
+            List<SportEvent> studentEvents = sportEventRepository.findUpcomingEventsByStudent(sportid, currentTime);
+
+            BaseResponse baseResponse = new BaseResponse(studentEvents, HttpStatus.OK,
+                    "Upcoming Events successfully fetched");
+
+            return baseResponse;
+
+        }
+
+        catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            BaseResponse baseResponse = new BaseResponse(null, status, message);
+            return baseResponse;
+
+        } catch (Exception e) {
+            BaseResponse baseResponse = new BaseResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            return baseResponse;
+
+        }
+    }
+
 }

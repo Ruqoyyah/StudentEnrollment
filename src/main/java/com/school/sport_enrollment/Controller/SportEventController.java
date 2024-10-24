@@ -116,4 +116,20 @@ public class SportEventController {
 
         return new ResponseEntity<>(sportEvent, sportEvent.getStatusCode());
     }
+
+    @GetMapping("/get_past_event_byuserid/{userid}")
+
+    public ResponseEntity<BaseResponse> getPastEventsForStudent(@PathVariable Long userid) {
+        BaseResponse sportEvent = sportEventService.getPastEventsForStudent(userid);
+
+        return new ResponseEntity<>(sportEvent, sportEvent.getStatusCode());
+    }
+
+    @GetMapping("/get_Upcoming_event_byuserid/{userid}")
+
+    public ResponseEntity<BaseResponse> getUpcomingEventsForStudent(@PathVariable Long userid) {
+        BaseResponse sportEvent = sportEventService.getUpcomingEventsForStudent(userid);
+
+        return new ResponseEntity<>(sportEvent, sportEvent.getStatusCode());
+    }
 }

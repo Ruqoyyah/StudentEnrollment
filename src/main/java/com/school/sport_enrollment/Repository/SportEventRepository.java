@@ -1,5 +1,6 @@
 package com.school.sport_enrollment.Repository;
 
+import org.antlr.v4.runtime.atn.SemanticContext.AND;
 import org.apache.el.stream.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.school.sport_enrollment.Model.Sport;
 import com.school.sport_enrollment.Model.SportEvent;
+import com.school.sport_enrollment.Model.User;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -44,5 +47,14 @@ public interface SportEventRepository extends JpaRepository<SportEvent, Long> {
 
         @Query("SELECT e FROM SportEvent e WHERE e.sport.id IN :sportid")
         List<SportEvent> findEventBySportId(@Param("sportid") List<Long> sportid);
+
+        @Query("SELECT e FROM SportEvent e WHERE e.sport.id IN :sportid AND e.eventDate < :currentDate ")
+
+        List<SportEvent> findPastEventsByStudent(List<Long> sportid, @Param("currentDate") LocalDateTime currentDate);
+
+        @Query("SELECT e FROM SportEvent e WHERE e.sport.id IN :sportid AND e.eventDate > :currentDate ")
+
+        List<SportEvent> findUpcomingEventsByStudent(List<Long> sportid,
+                        @Param("currentDate") LocalDateTime currentDate);
 
 }
