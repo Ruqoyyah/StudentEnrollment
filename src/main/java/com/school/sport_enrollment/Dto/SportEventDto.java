@@ -10,6 +10,7 @@ public class SportEventDto {
     private String eventName;
     private LocalDateTime eventDate;
 
+    // Getters and setters.
     public Long getSportId() {
         return sportId;
     }

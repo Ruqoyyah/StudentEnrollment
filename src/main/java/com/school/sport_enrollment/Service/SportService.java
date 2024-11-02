@@ -50,6 +50,11 @@ public class SportService {
             if (Helpers.isStringEmptyOrBlank(sportDto.getSportName())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport Name cannot be blank");
             }
+
+            if (sportDto.getYear() == null || Helpers.isStringEmptyOrBlank(sportDto.getSeason())) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport Year cannot be blank");
+            }
             Optional<Sport> sport = sportRepository.findBySportNameAndYear(sportDto.getSportName(), sportDto.getYear());
 
             if (sport.isPresent()) {

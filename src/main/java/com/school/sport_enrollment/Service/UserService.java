@@ -115,7 +115,7 @@ public class UserService {
             newUser.setPassword(this.passwordEncoder().encode(userDto.getPassword()));
             newUser.setUserType(UserType.SUPER_ADMIN);
             User createdAdmin = userRepository.save(newUser);
-            UserResponse userResponse = new UserResponse(createdAdmin, HttpStatus.OK,
+            UserResponse userResponse = new UserResponse(createdAdmin, HttpStatus.CREATED,
                     "Admin user successfully created");
             return userResponse;
 
@@ -163,7 +163,53 @@ public class UserService {
             newStudent.setPassword(this.passwordEncoder().encode(userDto.getPassword()));
             newStudent.setUserType(UserType.STUDENT);
             User createdStudent = userRepository.save(newStudent);
-            UserResponse userResponse = new UserResponse(createdStudent, HttpStatus.OK, "Student successfully created");
+            UserResponse userResponse = new UserResponse(createdStudent, HttpStatus.CREATED,
+                    "Student successfully created");
+            return userResponse;
+
+        } catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            UserResponse userResponse = new UserResponse(null, status, message);
+            return userResponse;
+
+            // TODO: handle exception
+        } catch (Exception e) {
+            System.out.println(e);
+            UserResponse userResponse = new UserResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            return userResponse;
+        }
+    }
+
+    public UserResponse createdCoach(UserDto userDto) {
+        try {
+
+            if (Helpers.isStringEmptyOrBlank(userDto.getUsername())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be blank");
+            }
+            Optional<User> existingUser = userRepository.findByUsername(userDto.getUsername());
+
+            if (existingUser.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username  already exist");
+            }
+            Optional<User> existingEmail = userRepository.findByEmail(userDto.getEmail());
+
+            if (existingEmail.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exist");
+            }
+
+            User newCoach = new User();
+            newCoach.setFirstname(userDto.getFirstname());
+            newCoach.setLastname(userDto.getLastname());
+            newCoach.setEmail(userDto.getEmail());
+            newCoach.setUsername(userDto.getUsername());
+            newCoach.setPassword(this.passwordEncoder().encode(userDto.getPassword()));
+            newCoach.setUserType(UserType.COACH);
+            User createdCoach = userRepository.save(newCoach);
+            UserResponse userResponse = new UserResponse(createdCoach, HttpStatus.CREATED,
+                    "Coach successfully created");
             return userResponse;
 
         } catch (ResponseStatusException e) {
@@ -299,10 +345,6 @@ public class UserService {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You've exceeded your sport limit");
                     }
 
-                    // List<Sport> roles = user.getRoles();
-                    // roles.add(use.get());
-                    // user.setRoles(roles);
-                    // users.add(user);
                 }
                 if (sport.get().getSportType().equals(SportType.TEAM)) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You've exceeded your sport limit");
@@ -345,6 +387,55 @@ public class UserService {
 
     }
 
+    public UserResponse updateCoachWithSport(Long userId, Long sportId) {
+        try {
+
+            Optional<User> user = userRepository.findById(userId);
+
+            if (!user.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+            }
+            Optional<Sport> sport = sportRepository.findById(sportId);
+
+            if (!sport.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sport does not exist");
+            }
+
+            List<Sport> userExistingSport = user.get().getSport();
+
+            if (userExistingSport.size() > 0) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "A coach cannot be assigned to more than one sport ");
+
+            } else {
+
+                userExistingSport.add(sport.get());
+
+                user.get().setSport(userExistingSport);
+                userRepository.save(user.get());
+                UserResponse userResponse = new UserResponse(user.get(), HttpStatus.OK,
+                        "Sport successfully added to Coach");
+                return userResponse;
+
+            }
+
+        } catch (ResponseStatusException e) {
+            String message = e.getReason();
+            Integer statusValue = e.getStatusCode().value();
+            HttpStatus status = HttpStatus.valueOf(statusValue);
+
+            UserResponse userResponse = new UserResponse(null, status, message);
+            return userResponse;
+
+        } catch (Exception e) {
+            UserResponse userResponse = new UserResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            System.out.println(e);
+            return userResponse;
+        }
+
+    }
+
     public BaseResponse getUserBySportId(Long sportid) {
 
         try {
@@ -366,6 +457,27 @@ public class UserService {
             return baseResponse;
         }
 
+    }
+
+    public BaseResponse getUserBySportIdByCoach(Long sportid) {
+
+        try {
+            Optional<Sport> sport = sportRepository.findById(sportid);
+            if (sport.isEmpty()) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+            }
+            List<User> students = userRepository.findAllUsersBySportIdWithType(sportid, UserType.STUDENT);
+
+            BaseResponse baseResponse = new BaseResponse(students, HttpStatus.OK, "Users successfully fetched");
+            return baseResponse;
+
+        } catch (Exception e) {
+            BaseResponse baseResponse = new BaseResponse(null, HttpStatus.INTERNAL_SERVER_ERROR, "An error occured");
+            System.out.println(e);
+            return baseResponse;
+
+        }
     }
 
     public UserResponse updateUserBySportId(Long userId, Long sportId) {
@@ -465,4 +577,5 @@ public class UserService {
         return user.get();
 
     }
+
 }

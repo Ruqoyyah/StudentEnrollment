@@ -16,6 +16,7 @@ public class SportDto {
     private Long year;
     private String season;
 
+    // Getters and Setters
     public Long getYear() {
         return year;
     }
