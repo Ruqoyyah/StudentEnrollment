@@ -96,9 +96,9 @@ public class Sport {
         this.sportType = sportType;
     }
 
-    @JsonIgnore
+    @JsonIgnore // Ignores this property in JSON serialization to prevent circular references.
     @ManyToMany(mappedBy = "sport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<User> users;
+    private List<User> users; // List of users associated with this sport.
 
     public List<User> getUsers() {
         return users;
@@ -108,7 +108,7 @@ public class Sport {
         this.users = users;
     }
 
-    @OneToMany(mappedBy = "sport", cascade = CascadeType.ALL)
-    private List<SportEvent> events;
+    @OneToMany(mappedBy = "sport", cascade = CascadeType.ALL) // One-to-many relationship with SportEvent.
+    private List<SportEvent> events; // List of events associated with this sport.
 
 }
